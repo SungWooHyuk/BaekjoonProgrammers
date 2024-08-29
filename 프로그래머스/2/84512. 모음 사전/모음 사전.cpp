@@ -1,32 +1,25 @@
 #include <string>
 #include <vector>
+#include <map>
 
 using namespace std;
-int answer = 0;
-int cnt = -1;
-string AEIOU = "AEIOU";
-string target = "";
-void dfs(string word) 
-{
-    if(answer == cnt)
-        return;
+// 가중치 풀이 ..
+int solution(string word) {
+    int answer = 0;
+    map<char, int> alp;
+    int next_word[5] = { 781, 156, 31, 6, 1 };
     
-    for(int i = 0; i < 5; ++i)
-    {
-        word = word + AEIOU[i];
-        answer++;
-        
-        if(target == word)
-            cnt = answer;
-        
-        if(word.length() < 5)
-            dfs(word);
-        
-        word.pop_back();
-    }   
-}
-int solution(string word) {   
-    target = word;
-    dfs("");
-    return cnt;
+    alp.insert({'A', 0});
+    alp.insert({'E', 1});
+    alp.insert({'I', 2});
+    alp.insert({'O', 3});
+    alp.insert({'U', 4});
+    
+    int i = 0;
+    for (const auto& w : word) {
+        answer += 1 + alp[w] * next_word[i];
+        i++;
+    }
+    
+    return answer;
 }
