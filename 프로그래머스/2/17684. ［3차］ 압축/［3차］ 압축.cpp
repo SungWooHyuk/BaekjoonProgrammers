@@ -6,55 +6,34 @@ using namespace std;
 
 vector<int> solution(string msg) {
     unordered_map<string, int> m;
-    for(int i = 0; i < 26; ++i)
-        m[string(1, 'A'+i)] = i+1; // A부터Z까지 1~26 할당
-    
-    int cnt = 27; // m 추가용
-    string str; // 추가용
-    string str2; // 넣기용
-    vector<int> answer;
-    
-    for(int i = 0; i < msg.size(); ++i) // msg를 처음부터 끝까지 살펴볼껀데
-    {    
-        str += msg[i];
-        int skip = 0; // 스킵용
+    // A부터 Z까지 초기화
+    for (char c = 'A'; c <= 'Z'; ++c) {
+        m[string(1, c)] = c - 'A' + 1; 
+    }
 
-        while(1)
-        {    
-            if(m[str] == 0) // 존재하지않음 
-            {
-                m[str] = cnt;
-                answer.push_back(m[str2]);
-                cnt++; // 사전순서 관리
-                str.clear(); // str 비워주고
-                i += (skip-1); // skip만큼 i를 뛰어넘어주고
-                break; // 종료
-            }
-            else // 존재함
-            {
-                str2 =str; // 무조건 처음엔 옴
-                skip++; // skip을 늘려주고
-            }
-            
-            // 범위체크
-            if(i+skip < msg.size())
-                str += msg[i+skip];
-            else // 범위초과임
-                if(!str.empty())
-                {
-                    if(m[str] == 0)
-                        answer.push_back(cnt);
-                    else
-                        answer.push_back(m[str]);
-                    
-                    i += (skip);
-                    break; // 끝내기
-                }
+    vector<int> answer; // 결과를 저장할 벡터
+    string current; // 현재 문자열
+    int index = 27; // 다음 색인 번호
+
+    for (int i = 0; i < msg.size();) {
+        current += msg[i]; // 현재 문자 추가
+
+        // 현재 문자열이 사전에 존재하는지 확인
+        if (m.find(current) != m.end()) {
+            // 존재하는 경우 다음 문자로 진행
+            i++;
+        } else {
+            // 존재하지 않는 경우
+            answer.push_back(m[current.substr(0, current.size() - 1)]); // 마지막 문자 제거한 이전 문자열 색인 기록
+            m[current] = index++; // 현재 문자열을 사전에 추가
+            current.clear(); // 현재 문자열 비우기
         }
     }
-    
-    
-    
-    
+
+    // 마지막 남은 문자열 처리
+    if (!current.empty()) {
+        answer.push_back(m[current]);
+    }
+
     return answer;
 }
