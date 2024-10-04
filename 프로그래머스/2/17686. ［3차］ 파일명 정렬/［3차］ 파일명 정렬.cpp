@@ -12,51 +12,35 @@ using namespace std;
 // HEAD, NUMBER부분을 분리해준다. 나머지 부분들을 합해서 TAIL로 냅두고.
 // 1단계는 HEAD끼리비교 -> 이게 같다? 그러면 2단계 NUMBER비교 -> 어? 냅두기.
 // 1000개니까 그냥 
-tuple<string, string, string> splitFile(const string& file) {
-    string head, number, tail;
-    int i = 0;
-
-    // HEAD 추출
-    while (i < file.size() && !isdigit(file[i])) {
-        head += file[i++];
-    }
-
-    // NUMBER 추출 (최대 5자리)
-    int count = 0;
-    while (i < file.size() && isdigit(file[i]) && count < 5) {
-        number += file[i++];
-        count++;
-    }
-
-    // TAIL 추출 (나머지 부분)
-    tail = file.substr(i);
-
-    return make_tuple(head, number, tail);
-}
-
 vector<string> solution(vector<string> files) {
-    // stable_sort를 사용해 정렬
-    stable_sort(files.begin(), files.end(), [](const string& a, const string& b) {
-        // 파일을 HEAD, NUMBER, TAIL로 분리
-        auto [head1, number1, tail1] = splitFile(a);
-        auto [head2, number2, tail2] = splitFile(b);
+   stable_sort(files.begin(), files.end(), [](const string& a, const string& b) {
+        string head1, head2;
+        string num1, num2;
+
+        // HEAD 추출
+        int i = 0;
+        while (i < a.size() && !isdigit(a[i])) head1 += a[i++];
+        int j = 0;
+        while (j < b.size() && !isdigit(b[j])) head2 += b[j++];
 
         // HEAD를 소문자로 변환해서 비교
         transform(head1.begin(), head1.end(), head1.begin(), ::tolower);
         transform(head2.begin(), head2.end(), head2.begin(), ::tolower);
 
-        // HEAD 비교
+        // HEAD가 다르면 사전순으로 정렬
         if (head1 != head2) return head1 < head2;
 
-        // NUMBER 비교 (숫자로 변환)
-        int num1 = stoi(number1);
-        int num2 = stoi(number2);
+        // NUMBER 추출
+        while (i < a.size() && isdigit(a[i])) num1 += a[i++];
+        while (j < b.size() && isdigit(b[j])) num2 += b[j++];
 
-        if (num1 != num2) return num1 < num2;
+        // stoi를 사용하여 숫자 비교
+        int n1 = stoi(num1);
+        int n2 = stoi(num2);
+        if (n1 != n2) return n1 < n2;
 
-        // HEAD와 NUMBER가 같으면 원래 순서를 유지
+        // HEAD, NUMBER가 같다면 원래 순서 유지 (tail 비교는 하지 않음)
         return false;
     });
-
     return files;
 }
