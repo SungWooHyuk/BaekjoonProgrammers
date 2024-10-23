@@ -1,64 +1,48 @@
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <algorithm>
-#include <utility>
+
 using namespace std;
+
+map<string, int> combination;
+
+bool cmp(pair<string, int> &a, pair<string, int> &b) {
+    return a.second > b.second;
+}
+
+// 각 order에 대해 조합의 수가 len인 단품메뉴 조합의 주문 개수 카운트
+void dfs(string &order, int &len, string tmp, int idx) {
+    if (tmp.length() == len) {
+        combination[tmp]++; // 해당 조합의 주문 수++
+        return;
+    }
+    
+    for (int i=idx; i<order.length(); i++) {
+        dfs(order, len, tmp + order[i], i + 1);
+    }
+}
 
 vector<string> solution(vector<string> orders, vector<int> course) {
     vector<string> answer;
-    unordered_map<string,int> m;
     
-    for(int i = 0; i < orders.size(); ++i)
-    {
-        sort(orders[i].begin(), orders[i].end());
+    for (int len: course) {
+        for (string order: orders) {
+            sort(order.begin(), order.end());
+            dfs(order, len, "", 0);   
+        }
         
-        for(int j = 0; j < course.size(); ++j)
-        {
-            if(course[j] > orders[i].length())
-                continue;
-            vector<bool> v(orders[i].size(), true);
-            for(int k = 0 ; k < course[j]; ++k)
-                v[k] = false;
-            
-            do{
-                string str ="";
-                for(int k = 0; k < orders[i].size(); ++k)
-                {
-                    if(v[k] == false)
-                        str += orders[i][k];
-                }
-                m[str]++;
-            }while(next_permutation(v.begin(), v.end()));
+        int maxCount = 0; // 가장 많이 주문된 수
+        for (auto it: combination) {
+            maxCount = max(maxCount, it.second);
         }
-    }
-    
-    vector<pair<string,int>> sorted;
-    for(auto map : m)
-    {
-        if(map.second > 1)
-            sorted.push_back(make_pair(map.first, map.second));
-    }
-    sort(sorted.begin(), sorted.end(), [](const pair<string,int>& a, const pair<string,int>& b){
-        return a.second > b.second; // 내림
-    });
-    
-    for(int i = 0 ; i < course.size(); ++i)
-    {
-        int max = 0;
-        for(int j = 0; j < sorted.size(); ++j)
-        {
-            if(sorted[j].first.length() != course[i])
-                continue;
-            else if(max == 0){
-                answer.push_back(sorted[j].first);
-                max = sorted[j].second;
-            }
-            else if(max == sorted[j].second)
-                answer.push_back(sorted[j].first);
-            else
-                break;
+        
+        for (auto it: combination) {
+            if (maxCount < 2) break;
+            else if (combination[it.first] == maxCount) answer.push_back(it.first);
         }
+        
+        combination.clear(); // 다음 단품메뉴의 개수의 연산을 위해 clear
     }
     
     sort(answer.begin(), answer.end());
